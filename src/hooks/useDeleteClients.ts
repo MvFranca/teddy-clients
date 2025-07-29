@@ -7,7 +7,8 @@ export function useDeleteClient() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`/api/clients/${id}`);
+        console.log('id:', id)
+      await axios.delete(`https://boasorte.teddybackoffice.com.br/users/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });

@@ -124,8 +124,10 @@ export function ClientsList() {
   const openDeleteModal = (client: { id: string; name: string }) => {
     setClientToDelete(client);
   };
-
-  const confirmDeleteClient = () => {
+  console.log("teste")
+  const confirmDeleteClient = (event?: React.FormEvent) => {
+      event?.preventDefault();
+      
     if (!clientToDelete) return;
     deleteClient(clientToDelete.id, {
       onSuccess: () => setClientToDelete(null),
@@ -218,7 +220,7 @@ export function ClientsList() {
         onClose={() => setClientToDelete(null)}
         title="Excluir Cliente:"
         textButton={isDeleting ? "Excluindo..." : "Excluir Cliente"}
-        onSubmit={confirmDeleteClient}
+        onConfirm={confirmDeleteClient}
       >
         <p>
           Você está prestes a excluir o cliente:{" "}
