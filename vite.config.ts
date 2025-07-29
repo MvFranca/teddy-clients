@@ -8,11 +8,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
     federation({
-      name: "welcome",
+      name: "clients",
       filename: "remoteEntry.js",
       exposes: {
-        "./Welcome": "./src/ui/pages/welcome.tsx",
-        // "./Welcome": "./src/index.ts",
+        "./Clients": "./src/ui/pages/Clients.tsx",
+        "./SelectClients": "./src/ui/pages/SelectClients.tsx",
+
       },
       shared: ["react", "react-dom"],
       

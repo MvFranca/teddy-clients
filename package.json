@@ -13,13 +13,16 @@
     "@module-federation/vite": "^1.7.1",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.83.0",
-    "@teddy/design-system": "file:../teddy-design-system",
+    "@teddy/design-system": "git+https://github.com/MvFranca/teddy-design-system.git#v1.0.2",
     "axios": "^1.11.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwindcss": "^4.1.11"
+    "react-toastify": "^11.0.5",
+    "tailwindcss": "^4.1.11",
+    "zod": "^4.0.11",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
