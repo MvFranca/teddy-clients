@@ -11,7 +11,7 @@ export default defineConfig({
       name: "welcome",
       filename: "remoteEntry.js",
       exposes: {
-        "./Welcome": "./src/ui/pages/welcome.tsx",
+        "./Welcome": "./src/ui/pages/Clients.tsx",
         // "./Welcome": "./src/index.ts",
       },
       shared: ["react", "react-dom"],

@@ -1,95 +1,170 @@
-import { Button, ClientCard } from "@teddy/design-system";
-import { useClients } from "../../hooks/useClients";
 import { useState } from "react";
+import { Button, ClientCard, Modal } from "@teddy/design-system";
+import { useClients } from "../../hooks/useClients";
+import { useCreateClient } from "../../hooks/useCreateClient";
+import { clientSchema } from "../../schemas/clientSchema";
+import { PaginationControls } from "./PaginationControls";
+import { PerPageSelector } from "./PerPageSelector";
+import { ClientModalForm } from "./forms/ClientModalForm";
+import { useEditClient } from "../../hooks/useEditClient";
+
+type FormData = {
+  name: string;
+  salary: string;
+  companyValuation: string;
+};
+
+const emptyForm: FormData = {
+  name: "",
+  salary: "",
+  companyValuation: "",
+};
 
 export function ClientsList() {
-const [page, setPage] = useState(1);
-const [perPage, setPerPage] = useState(16);
+  const [pagination, setPagination] = useState({ page: 1, perPage: 16 });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState<FormData>(emptyForm);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-const { data, isFetching } = useClients(page, perPage);
+  const { data, isFetching } = useClients(pagination.page, pagination.perPage);
+  const { mutate: createClient, isPending: isPendingCreate } = useCreateClient();
+  const { mutate: editClient, isPending: isPendingEdit } = useEditClient();
 
-  const totalPages = data?.totalPages ?? 1;
   const clients = data?.clients ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
-  function handlePrev() {
-    setPage((old) => Math.max(old - 1, 1));
-  }
+  const handleInputChange = (label: string, value: string) => {
+    const key =
+      label.toLowerCase().includes("empresa")
+        ? "companyValuation"
+        : label.toLowerCase().includes("salário")
+        ? "salary"
+        : "name";
 
-  function handleNext() {
-    setPage((old) => Math.min(old + 1, totalPages));
-  }
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
 
-  function handlePerPageChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    setPerPage(Number(event.target.value));
-    setPage(1); // voltar para a primeira página ao trocar o limite
-  }
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const result = clientSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach(({ path, message }) => {
+        const key = path[0] as string;
+        fieldErrors[key] = message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
+    const payload = {
+      name: formData.name,
+      salary: Number(formData.salary),
+      companyValuation: Number(formData.companyValuation),
+    };
+
+    const onSuccess = () => {
+      setIsModalOpen(false);
+      setFormData(emptyForm);
+      setEditingId(null);
+    };
+
+    if (editingId) {
+      editClient({ id: editingId, ...payload }, { onSuccess });
+    } else {
+      createClient(payload, { onSuccess });
+    }
+  };
+
+  const openEditModal = (client: {
+    id: string;
+    name: string;
+    salary: number;
+    companyValuation: number;
+  }) => {
+    setEditingId(client.id);
+    setFormData({
+      name: client.name,
+      salary: client.salary.toString(),
+      companyValuation: client.companyValuation.toString(),
+    });
+    setErrors({});
+    setIsModalOpen(true);
+  };
+
+  const openCreateModal = () => {
+    setEditingId(null);
+    setFormData(emptyForm);
+    setErrors({});
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="w-screen min-h-screen flex justify-center items-start py-8">
-      <div className="max-w-[1200px] w-full px-4 flex gap-y-2.5 flex-col">
+      <div className="max-w-[1200px] w-full px-4 flex flex-col gap-y-2.5">
         <div className="flex justify-between items-center">
           <p className="text-black text-lg">
-            <span className="font-bold">{data?.clients.length ?? 0}</span> clientes encontrados:
+            <span className="font-bold">{clients.length}</span> clientes encontrados:
           </p>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="perPage" className="hidden sm:block text-lg text-black">
-              Clientes por página:
-            </label>
-            <select
-              id="perPage"
-              name="perPage"
-              className="border border-gray-300 rounded px-2 py-1 text-sm cursor-pointer"
-              value={perPage}
-              onChange={handlePerPageChange}
-            >
-              <option value={4}>4</option>
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-              <option value={16}>16</option>
-            </select>
-          </div>
+          <PerPageSelector
+            perPage={pagination.perPage}
+            onChange={(value) => setPagination({ page: 1, perPage: value })}
+          />
         </div>
-        {/* Lista de cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-[10px]">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-2">
           {clients.map((client) => (
             <ClientCard
               key={client.id}
               name={client.name}
               salary={client.salary}
               company={client.companyValuation}
+              onEdit={() => openEditModal(client)}
             />
           ))}
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => alert("Criar Cliente")}
-          fullWidth
-        >
+        <Button variant="outline" onClick={openCreateModal} fullWidth size="sm">
           Criar Cliente
         </Button>
 
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={page === 1 || isFetching}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Anterior
-          </button>
-          <span className="text-gray-700">
-            Página {page} de {totalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={page === totalPages || isFetching}
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Próximo
-          </button>
-        </div>
+        <PaginationControls
+          page={pagination.page}
+          totalPages={totalPages}
+          isFetching={isFetching}
+          onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+        />
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setErrors({});
+          setEditingId(null);
+        }}
+        title={editingId ? "Editar Cliente" : "Criar Cliente"}
+        alert=""
+        textButton={editingId ? (isPendingEdit ? "Salvando..." : "Salvar") : isPendingCreate ? "Criando..." : "Criar"}
+        onSubmit={handleSubmit}
+      >
+        {[
+          { label: "Nome", type: "text", placeholder: "Digite o nome" },
+          { label: "Salário", type: "number", placeholder: "Digite o salário" },
+          { label: "Empresa", type: "text", placeholder: "Digite o valor da empresa" },
+        ].map((input, index) => (
+          <ClientModalForm
+            key={index}
+            input={input}
+            value={formData}
+            errors={errors}
+            onChange={handleInputChange}
+          />
+        ))}
+      </Modal>
     </div>
   );
 }
