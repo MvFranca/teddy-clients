@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { API_URL } from "../config/api";
 
 export function useDeleteClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-        console.log('id:', id)
-      await axios.delete(`https://boasorte.teddybackoffice.com.br/users/${id}`);
+      await axios.delete(`${API_URL}/users/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });

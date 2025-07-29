@@ -25,8 +25,7 @@ export const ClientModalForm = ({
     : "name";
 
   return (
-    <div className="mb-2">
-      <label className="block text-sm font-medium mb-1">{input.label}</label>
+    <div className="mb-[10px]">
       <Input
         type={input.type}
         placeholder={input.placeholder}

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { API_URL } from "../config/api"; 
 
 type NewClient = {
   name: string;
@@ -13,7 +14,7 @@ export function useCreateClient() {
   return useMutation({
     mutationFn: async (newClient: NewClient) => {
       const { data } = await axios.post(
-        "https://boasorte.teddybackoffice.com.br/users",
+        `${API_URL}/users`,
         newClient
       );
       return data;

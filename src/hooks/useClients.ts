@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { API_URL } from "../config/api"; 
 
 type Client = {
   id: string;
@@ -15,13 +16,11 @@ type Response = {
   perPage: number;
 };
 
-
 export function useClients(page: number, perPage: number) {
   return useQuery<Response>({
     queryKey: ["clients", page, perPage],
     queryFn: async () => {
-      const { data } = await axios.get<Response>(
-        "https://boasorte.teddybackoffice.com.br/users",
+      const { data } = await axios.get<Response>(`${API_URL}/users`,
         {
           params: { page, limit: perPage },
         }

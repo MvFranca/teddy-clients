@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { API_URL } from "../config/api";
 
 type EditClientInput = {
   id: string;
@@ -13,8 +14,7 @@ export function useEditClient() {
 
   return useMutation({
     mutationFn: async ({ id, ...rest }: EditClientInput) => {
-      const { data } = await axios.patch(
-        `https://boasorte.teddybackoffice.com.br/users/${id}`,
+      const { data } = await axios.patch(`${API_URL}/users/${id}`,
         rest
       );
       return data;
