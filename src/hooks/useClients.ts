@@ -1,22 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import type { Client } from "../types/ClientType";
+
+type Client = {
+  id: string;
+  name: string;
+  salary: number;
+  companyValuation: number;
+};
 
 type Response = {
   clients: Client[];
-  total: number;
+  totalPages: number;
   page: number;
   perPage: number;
 };
 
-export function useClients(page: number) {
-  return useQuery({
-    queryKey: ["clients", page],
-    queryFn: async (): Promise<Response> => {
-      const res = await axios.get("https://boasorte.teddybackoffice.com.br/users", {
-        params: { page, per_page: 10 },
-      });
-      return res.data;
+
+
+export function useClients(page: number, perPage: number) {
+  return useQuery<Response>({
+    queryKey: ["clients", page, perPage],
+    queryFn: async () => {
+      const { data } = await axios.get<Response>(
+        "https://boasorte.teddybackoffice.com.br/users",
+        {
+          params: { page, limit: perPage },
+        }
+      );
+      return data;
     },
   });
 }
