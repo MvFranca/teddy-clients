@@ -16,7 +16,6 @@ type Response = {
 };
 
 
-
 export function useClients(page: number, perPage: number) {
   return useQuery<Response>({
     queryKey: ["clients", page, perPage],

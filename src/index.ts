@@ -1,2 +1,2 @@
-export { default as Welcome } from "./ui/pages/Clients";
-export type { WelcomeProps } from "./types/WelcomeTypes";
+export { default as Clients } from "./ui/pages/Clients";
+export { default as Select } from "./ui/pages/SelectClients";

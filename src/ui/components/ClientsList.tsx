@@ -7,6 +7,9 @@ import { PaginationControls } from "./PaginationControls";
 import { PerPageSelector } from "./PerPageSelector";
 import { ClientModalForm } from "./forms/ClientModalForm";
 import { useEditClient } from "../../hooks/useEditClient";
+import { useDeleteClient } from "../../hooks/useDeleteClients";
+import { useSelectedClientsStore } from "../../store/useSelectedClientsStore";
+import { toast } from "react-toastify";
 
 type FormData = {
   name: string;
@@ -26,25 +29,41 @@ export function ClientsList() {
   const [formData, setFormData] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const { data, isFetching } = useClients(pagination.page, pagination.perPage);
-  const { mutate: createClient, isPending: isPendingCreate } = useCreateClient();
+  const { mutate: createClient, isPending: isPendingCreate } =
+    useCreateClient();
   const { mutate: editClient, isPending: isPendingEdit } = useEditClient();
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
 
   const clients = data?.clients ?? [];
   const totalPages = data?.totalPages ?? 1;
 
   const handleInputChange = (label: string, value: string) => {
-    const key =
-      label.toLowerCase().includes("empresa")
-        ? "companyValuation"
-        : label.toLowerCase().includes("salário")
-        ? "salary"
-        : "name";
+    const key = label.toLowerCase().includes("empresa")
+      ? "companyValuation"
+      : label.toLowerCase().includes("salário")
+      ? "salary"
+      : "name";
 
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const addClient = useSelectedClientsStore((s) => s.addClient);
+
+  const handleAdd = (client: {
+    id: string;
+    name: string;
+    salary: number;
+    companyValuation: number;
+  }) => {
+    addClient(client);
+    toast.success("Cliente adicionado com sucesso!");
+  };
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const result = clientSchema.safeParse(formData);
@@ -102,12 +121,24 @@ export function ClientsList() {
     setIsModalOpen(true);
   };
 
+  const openDeleteModal = (client: { id: string; name: string }) => {
+    setClientToDelete(client);
+  };
+
+  const confirmDeleteClient = () => {
+    if (!clientToDelete) return;
+    deleteClient(clientToDelete.id, {
+      onSuccess: () => setClientToDelete(null),
+    });
+  };
+
   return (
     <div className="w-screen min-h-screen flex justify-center items-start py-8">
-      <div className="max-w-[1200px] w-full px-4 flex flex-col gap-y-2.5">
+      <div className="max-w-[1200px] w-full flex flex-col gap-y-2.5">
         <div className="flex justify-between items-center">
           <p className="text-black text-lg">
-            <span className="font-bold">{clients.length}</span> clientes encontrados:
+            <span className="font-bold">{clients.length}</span> clientes
+            encontrados:
           </p>
           <PerPageSelector
             perPage={pagination.perPage}
@@ -123,6 +154,10 @@ export function ClientsList() {
               salary={client.salary}
               company={client.companyValuation}
               onEdit={() => openEditModal(client)}
+              onDelete={() =>
+                openDeleteModal({ id: client.id, name: client.name })
+              }
+              onAdd={() => handleAdd(client)}
             />
           ))}
         </div>
@@ -146,15 +181,27 @@ export function ClientsList() {
           setErrors({});
           setEditingId(null);
         }}
-        title={editingId ? "Editar Cliente" : "Criar Cliente"}
+        title={editingId ? "Editar Cliente:" : "Criar Cliente:"}
         alert=""
-        textButton={editingId ? (isPendingEdit ? "Salvando..." : "Salvar") : isPendingCreate ? "Criando..." : "Criar"}
+        textButton={
+          editingId
+            ? isPendingEdit
+              ? "Salvando..."
+              : "Salvar"
+            : isPendingCreate
+            ? "Criando..."
+            : "Criar"
+        }
         onSubmit={handleSubmit}
       >
         {[
           { label: "Nome", type: "text", placeholder: "Digite o nome" },
           { label: "Salário", type: "number", placeholder: "Digite o salário" },
-          { label: "Empresa", type: "text", placeholder: "Digite o valor da empresa" },
+          {
+            label: "Empresa",
+            type: "text",
+            placeholder: "Digite o valor da empresa",
+          },
         ].map((input, index) => (
           <ClientModalForm
             key={index}
@@ -164,6 +211,19 @@ export function ClientsList() {
             onChange={handleInputChange}
           />
         ))}
+      </Modal>
+
+      <Modal
+        isOpen={!!clientToDelete}
+        onClose={() => setClientToDelete(null)}
+        title="Excluir Cliente:"
+        textButton={isDeleting ? "Excluindo..." : "Excluir Cliente"}
+        onSubmit={confirmDeleteClient}
+      >
+        <p>
+          Você está prestes a excluir o cliente:{" "}
+          <span className="text-black font-bold">{clientToDelete?.name}</span>
+        </p>
       </Modal>
     </div>
   );
