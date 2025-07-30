@@ -1,13 +1,7 @@
-// src/store/useSelectedClientsStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Client } from "../types/ClientType";
 
-interface Client {
-  id: string;
-  name: string;
-  salary: number;
-  companyValuation: number
-}
 
 interface SelectedClientsStore {
   selectedClients: Client[];

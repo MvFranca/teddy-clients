@@ -1,11 +1,5 @@
 import { ClientCard } from "@teddy/design-system";
-
-type Client = {
-  id: string;
-  name: string;
-  salary: number;
-  companyValuation: number;
-};
+import type { Client } from "../../../types/ClientType";
 
 type Props = {
   clients: Client[];

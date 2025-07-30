@@ -1,4 +1,3 @@
-// forms/ClientModalForm.tsx
 import { Input } from "@teddy/design-system";
 
 interface ClientModalFormProps {
