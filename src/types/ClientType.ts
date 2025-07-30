@@ -1,6 +1,6 @@
 export type Client = {
   id: string;
   name: string;
-  salary: string;
+  salary: number;
   companyValuation: number;
 };
