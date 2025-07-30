@@ -32,7 +32,7 @@ const SelectedClientsScreen = () => {
                 <ClientCard
                   key={client.id}
                   name={client.name}
-                  salary={client.salary}
+                  salary={Number(client.salary)}
                   company={client.companyValuation}
                   variant="simple"
                   onDeleteSelect={() => removeClient(client.id)}
