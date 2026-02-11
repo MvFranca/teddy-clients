@@ -14,7 +14,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.83.0",
     "@teddy/design-system": "git+https://github.com/MvFranca/teddy-design-system.git#v1.0.2",
-    "axios": "^1.11.0",
+    "axios": "^1.13.5",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "react": "^19.1.0",
